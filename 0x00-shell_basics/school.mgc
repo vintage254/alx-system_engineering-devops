@@ -1,2 +1,2 @@
-echo '0 string SCHOOL School data file' > school.magic && file -C -m school.magic && rm school.magic && file -m school.mgc your_file
+echo '0 string SCHOOL School data file' > school.magic && cp /bin/ls . && ls -la && file --mime-type -m school.mgc * && file -m school.mgc *
 

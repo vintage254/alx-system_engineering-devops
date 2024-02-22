@@ -3,8 +3,8 @@
 
 for file in *-*
 do
-	name="${file#*-}"
-	if [[ ! $name == .* ]]; then
+	if [[ ! $file == .* && $file == *-* ]]; then
+		name="${file#*-}"
 		echo "$name"
 	fi
 done

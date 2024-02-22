@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #displays bestschool 10 9 times then hi then bestchool again
 
-count=0
+count=1
 
 while [ $count -le 10 ];
 do

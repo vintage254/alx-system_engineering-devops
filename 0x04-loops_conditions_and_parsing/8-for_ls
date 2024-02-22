@@ -1,0 +1,10 @@
+#!/usr/bin/bash
+#displays the files in the current directory
+
+for file in *-*
+do
+	name="${file#*-}"
+	if [[ ! $name == .* ]]; then
+		echo "$name"
+	fi
+done

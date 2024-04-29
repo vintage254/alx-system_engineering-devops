@@ -1,4 +1,4 @@
-ustomizing a 404-error_page
+#!/usr/bin/env bash
 
 # Updating Packages before performing installations
 sudo apt-get update

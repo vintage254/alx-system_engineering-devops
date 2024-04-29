@@ -1,12 +1,11 @@
-onfigures a new ubuntu machine by installing
+#!/usr/bin/env bash
+# Configures a new ubuntu machine by installing
 # Nginx where it should be listening on port 80
 # Serve a page that would return a Hello World string
-#
 
 echo -e "Updating and installing Nginx.\n"
 sudo apt-get update -y -qq && \
-	         sudo apt-get install nginx -y
-
+         sudo apt-get install nginx -y
 echo -e "\nSetting up some minor stuff.\n"
 
 # starting nginx service
@@ -15,11 +14,12 @@ sudo service nginx start
 # allowing nginx on firewall
 sudo ufw allow 'Nginx HTTP'
 
-# Give the user ownership to website files for easy editing
+#Give the user ownership to website files for easy editing
 sudo chown -R "$USER":"$USER" /var/www/html
 sudo chmod -R 755 /var/www
 
 # Backup default index
+
 cp /var/www/html/index.nginx-debian.html /var/www/html/index.nginx-debian.html.bckp
 
 # Creating new index
@@ -37,7 +37,6 @@ sudo sed -i "/server_name _/a add_header X-Served-By $HOSTNAME;" /etc/nginx/site
 
 #test for syntax error
 sudo nginx -t
-
 
 # Restarting nginx
 sudo service nginx restart

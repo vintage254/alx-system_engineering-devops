@@ -1,72 +1,46 @@
-# Puppet manifest to customize a http header response
+# Puppet manifest to configure a new Ubuntu machine with Nginx
+# and set up a custom HTTP response header
 
-# Update packages before performing installations
-exec { 'apt_update':
-  command     => '/usr/bin/apt-get update',
-  refreshonly => true,
-}
-
+# Install Nginx package
 package { 'nginx':
-  ensure  => installed,
-  require => Exec['apt_update'],
+  ensure => installed,
 }
 
-# Create an index.html page
-file { '/var/www/html/index.html':
-  ensure  => present,
-  content => 'Hello World!',
-}
-
-# Perform a "moved permanently redirection" (301)
-file_line { 'Redirect rule':
-  path    => '/etc/nginx/sites-enabled/default',
-  line    => 'server_name _;',
-  match   => '^server_name _;$',
-  after   => true,
-  require => Package['nginx'],
-}
-
-file_line { 'Redirect rule implementation':
-  path    => '/etc/nginx/sites-enabled/default',
-  line    => '    rewrite ^/redirect_me https://github.com/besthor permanent;',
-  match   => '^server_name _;$',
-  after   => true,
-  require => File_line['Redirect rule'],
-}
-
-# Create a 404 custom error page
-file { '/var/www/html/404.html':
-  ensure  => present,
-  content => 'Ceci n\'est pas une page',
-}
-
-file_line { '404 error page configuration':
-  path    => '/etc/nginx/sites-enabled/default',
-  line    => 'error_page 404 /404.html;',
-  match   => '^listen 80 default_server;$',
-  after   => true,
-  require => Package['nginx'],
-}
-
-# Create an HTTP response header
-file_line { 'HTTP response header':
-  path    => '/etc/nginx/sites-enabled/default',
-  line    => "    add_header X-Served-By ${::hostname};",
-  match   => '^server_name _;$',
-  after   => true,
-  require => Package['nginx'],
-}
-
-# Test configurations for syntax errors
-exec { 'nginx_syntax_check':
-  command => '/usr/sbin/nginx -t',
-  path    => '/usr/bin:/bin',
-  require => File['/var/www/html/index.html'],
-}
-
-# Restart nginx after implementing changes
+# Service resource to manage the Nginx service
 service { 'nginx':
-  ensure    => running,
-  enable    => true,
-  subscribe => File_line['Redirect rule implementation'],
+  ensure  => running,
+  enable  => true,
+  require => Package['nginx'],
+}
+
+#Allow Nginx on the firewall
+exec { 'allow_nginx':
+  command => 'ufw allow "Nginx HTTP"',
+  unless  => 'ufw status | grep "Nginx HTTP"',
+  path    => '/usr/sbin:/usr/bin:/sbin:/bin',
+}
+
+# Define the content for the custom HTTP response header
+$file_content = @(EOF)
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+
+    server_name _;
+
+    # Set up custom HTTP response header
+    add_header X-Served-By $::hostname;
+    
+    location / {
+        root /var/www/html;
+        index index.html index.htm;
+    }
+}
+EOF
+
+# Write the content to the Nginx default configuration file
+file { '/etc/nginx/sites-available/default':
+  ensure  => file,
+  content => $file_content,
+  notify  => Service['nginx'],
 }

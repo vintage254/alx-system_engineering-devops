@@ -1,9 +1,16 @@
 #!/usr/bin/env bash
 
-# remove the default nginx configuration file
+# Ensure NGINX is stopped before making changes
+service nginx stop
+
+# Remove the default NGINX configuration file
 rm /etc/nginx/sites-enabled/default
-#nginx to listen on port 80 for all active ipv4 ips
+
+# Create a symbolic link to the default NGINX configuration file
 ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
 
-# Start the NGINX service
-service nginx restart
+# Add a listen directive to the NGINX configuration to listen on port 80 for all IPv4 IPs
+sed -i 's/listen 80;/listen 80 default_server;/g' /etc/nginx/sites-available/default
+
+# Start NGINX
+service nginx start
